@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -191,25 +193,88 @@ class DatabaseHelper {
     }
   }
 
-  //Add a new restaurant (Create)
+  //Add a new restaurant 
   Future<int> insertRestaurant(Map<String, dynamic> restaurant) async {
     final db = await instance.database;
     return await db.insert('restaurants', restaurant);
   }
 
-  //Get all restaurants (Read)
+  //Get all restaurants 
   Future<List<Map<String, dynamic>>> getAllRestaurants() async {
     final db = await instance.database;
     return await db.query('restaurants', orderBy: 'name ASC');
   }
 
-  //Filtered by cuisine
-  Future<List<Map<String, dynamic>>> getallRestaurants() async {
+  //Filtered by Cuisine
+  Future<List<Map<String, dynamic>>> getResturantsByCuisine(String cuisine) async {
     final db = await instance.database;
-    return await db.query('restaurants', orderBy: 'name ASC');
+    return await db.query(
+      'restaurants',
+      where: 'cuisine =?',
+      whereArgs: [cuisine],
+    );
+  }
+  
+  //Filter by price range 
+Future<List<Map<String, dynamic>>> getRestaurantsByPrice(String priceRange) async {
+    final db = await instance.database;
+    return await db.query(
+      'restaurants',
+      where: 'price_range = ?',
+      whereArgs: [priceRange],
+    );
   }
 
+  //Get only favorite restaurants
+  Future<List<Map<String, dynamic >>> getFavoriteRestaurants() async {
+    final db = await instance.database;
+    return await db.query(
+      'restaurants',
+      where: 'is_favorite = ?',
+      whereArgs: [1],      
+    );
+  }
 
+  //Search restaurants by name or cuisine
+  Future<List<Map<String, dynamic >>> searchRestaurants(String query) async {
+    final db = await instance.database;
+      return await db.query(
+      'restaurants',
+      where: 'name LIKE ? OR cuisine LIKE ?',
+      whereArgs: ['%$query%' , '%$query%'],
+    );
+  }
+  
+  //Toggle favorite status
+  Future<int> toggleFavorite(int id, int isFavorite) async {
+    final db = await instance.database;
+    return await db.update(
+      'restaurants',
+      {'is_favorite' : isFavorite},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
 
+  //Remove a restaurant
+  Future<int> deleteRestaurant(int id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'restaurants',
+      where : 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  //Save a meal
+  Future<int> insertSavedMeal(Map<String, dynamic> meal) async {
+    final db = await instance.database;
+    return await db.insert('saved_meals', meal);
+  }
+  
+  //Get all saved meals
+  Future<List<Map<String, dynamic >>> getAllSavedMeals() async {
+    final db = await instance.database;
+    return await db.query('saved_meals', orderBy: 'saved_date DESC');
+  }
     }
-      
