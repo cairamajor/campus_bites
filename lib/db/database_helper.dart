@@ -186,6 +186,33 @@ class DatabaseHelper {
         'menu_highlights': 'Hibachi Chicken, Steak and Shrimp, Teriyaki Chicken',
         'is_favorite': 0,
       },
+      {
+        'name': 'Busy Bee Cafe',
+        'cuisine': 'Soul Food',
+        'price_range': '\$\$',
+        'open_hours': '11am - 8pm',
+        'location': '810 MLK Jr Dr, Atlanta',
+        'menu_highlights': 'Fried Chicken, Collard Greens, Mac and Cheese',
+        'is_favorite': 0,
+      },
+      {
+        'name': 'Sweet Auburn BBQ',
+        'cuisine': 'BBQ',
+        'price_range': '\$\$',
+        'open_hours': '11am - 9pm',
+        'location': '656 N Highland Ave, Atlanta',
+        'menu_highlights': 'Smoked Brisket, Pulled Pork, Mac and Cheese',
+        'is_favorite': 0,
+      },
+      {
+        'name': 'Panda Express',
+        'cuisine': 'Chinese',
+        'price_range': '\$',
+        'open_hours': '10am - 9pm',
+        'location': 'GSU Student Center, Atlanta',
+        'menu_highlights': 'Orange Chicken, Fried Rice, Chow Mein',
+        'is_favorite': 0,
+      },
     ];
 
     for(final restaurant in sampleRestaurants) {
