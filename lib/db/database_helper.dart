@@ -193,6 +193,8 @@ class DatabaseHelper {
     }
   }
 
+  //Restaurant CRUD
+
   //Add a new restaurant 
   Future<int> insertRestaurant(Map<String, dynamic> restaurant) async {
     final db = await instance.database;
@@ -266,6 +268,8 @@ Future<List<Map<String, dynamic>>> getRestaurantsByPrice(String priceRange) asyn
     );
   }
 
+  //Saved Meals CRUD
+
   //Save a meal
   Future<int> insertSavedMeal(Map<String, dynamic> meal) async {
     final db = await instance.database;
@@ -276,5 +280,147 @@ Future<List<Map<String, dynamic>>> getRestaurantsByPrice(String priceRange) asyn
   Future<List<Map<String, dynamic >>> getAllSavedMeals() async {
     final db = await instance.database;
     return await db.query('saved_meals', orderBy: 'saved_date DESC');
+  }
+
+  //Remove a saved meal
+  Future<int> deleteSavedMeal (int id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'saved_meals',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  //Review CRUD
+
+  //Add a review
+  Future<int> insertReview(Map<String, dynamic> review) async {
+    final db = await instance.database;
+    return await db.insert('reviews', review);
+  }
+
+  //Get all reviews for specific restaurants
+  Future<List<Map<String, dynamic>>> getReviewsForRestaurant(int restaurantId) async {
+    final db = await instance.database;
+    return await db.query (
+      'reviews',
+      where: 'restaurant_id = ?',
+      whereArgs: [restaurantId],
+      orderBy: 'review_date DESC',
+    );
+  }
+
+  //Get All reviews
+  Future<List<Map<String, dynamic>>> getAllReviews() async{
+    final db = await instance.database;
+    return await db.query('reviews', orderBy: 'review_date DESC');
+  }
+
+  //Remove a review
+  Future<int> deleteReview(int id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'reviews',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  //Budget History CRUD
+
+  //Log a meal expense 
+  Future<int> insertBudgetEntry(Map<String, dynamic> entry) async {
+    final db = await instance.database;
+    return await db.insert('budget_history', entry);
+  }
+
+  //Get all budget entries
+  Future<List<Map<String, dynamic>>> getAllBudgetEntries() async{
+    final db = await instance.database;
+    return await db.query('budget_history', orderBy: 'date DESC');
+  }
+  
+  //Get budget entries for the current week only
+  Future<List<Map<String, dynamic>>> getWeeklyBudgetEntries() async {
+    final db = await instance.database;
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday -1));
+    final startOfWeekStr = startOfWeek.toIso8601String().substring(0, 10);
+
+    return await db.query(
+      'budget_history',
+      where: 'date >= ?',
+      whereArgs: [startOfWeekStr],
+      orderBy: 'date DESC',
+    );
+  }
+
+  //Total amount spent this week
+  Future<double> getWeeklyTotal() async {
+    final entries = await getWeeklyBudgetEntries();
+    double total = 0.0;
+    for (final entry in entries) {
+      total += entry['amount'] as double;
+    }
+    return total;
+  }
+
+  // Remove a budget entry
+  Future<int> deleteBudgetEntry(int id ) async {
+    final db = await instance.database;
+    return await db.delete(
+      'budget_history',
+      where : 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // AI Meal Matcher
+  
+  Future<List<Map<String, dynamic>>> getAISuggestions({
+    required String mood,
+    required double remainingBudget,
+    required int minutesBetweenClasses,
+  }) async {
+    final db = await instance.database;
+
+    //Determine price range based on remaining budget
+    String priceFilter;
+    if (remainingBudget < 8) {
+      priceFilter = '\$';
+    } else if (remainingBudget < 20) {
+      priceFilter = '\$\$';
+    } else {
+      priceFilter = '\$\$\$';
+    }
+
+    List<Map<String, dynamic>> suggestions = [];
+
+    if (mood == 'Quick Bite' || minutesBetweenClasses < 30) {
+      // Short time will  suggest fast cheap options only
+      suggestions = await db.query(
+        'restaurants',
+        where: 'price_range = ?',
+        whereArgs: ['\$'],
+        orderBy: 'name ASC',
+      );
+    } else if (mood == 'Treat') {
+      // Treat mood will suggest anything
+      suggestions = await db.query(
+        'restaurants',
+        orderBy: 'name ASC',
+      );
+    } else {
+      // Hungry or default will filter by budget
+      suggestions = await db.query(
+        'restaurants',
+        where: 'price_range = ?',
+        whereArgs: [priceFilter],
+        orderBy: 'name ASC',
+      );
+    }
+
+    return suggestions;
   }
     }
