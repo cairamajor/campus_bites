@@ -1,3 +1,4 @@
+//Restaurant model
 class Restaurant {
   final int? id;
   final String name;
