@@ -235,7 +235,7 @@ class DatabaseHelper {
   }
 
   //Filtered by Cuisine
-  Future<List<Map<String, dynamic>>> getResturantsByCuisine(String cuisine) async {
+  Future<List<Map<String, dynamic>>> getRestaurantsByCuisine(String cuisine) async {
     final db = await instance.database;
     return await db.query(
       'restaurants',
