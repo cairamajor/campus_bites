@@ -438,6 +438,22 @@ Future<List<Map<String, dynamic>>> getRestaurantsByPrice(String priceRange) asyn
         'restaurants',
         orderBy: 'name ASC',
       );
+    } else if (mood == 'Late Night') {
+      //Late night will only show spots open past 10pm
+      suggestions = await db.query(
+        'restaurants',
+        where: 'open_hours LIKE ? OR open_hours LIKE ? OR open_hours LIKE ?',
+        whereArgs: ['%11pm%', '%12am%', '%1am%'],
+        orderBy: 'name ASC',
+      );
+    } else if (mood == 'Healthy') {
+      //Healthy mood will only show healthy cuisine
+      suggestions = await db.query(
+        'restaurants',
+        where: 'cuisine = ?',
+        whereArgs: ['Healthy'],
+        orderBy: 'name ASC',
+      );
     } else {
       // Hungry or default will filter by budget
       suggestions = await db.query(
