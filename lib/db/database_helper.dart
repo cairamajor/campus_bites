@@ -186,6 +186,33 @@ class DatabaseHelper {
         'menu_highlights': 'Hibachi Chicken, Steak and Shrimp, Teriyaki Chicken',
         'is_favorite': 0,
       },
+      {
+        'name': 'Busy Bee Cafe',
+        'cuisine': 'Soul Food',
+        'price_range': '\$\$',
+        'open_hours': '11am - 8pm',
+        'location': '810 MLK Jr Dr, Atlanta',
+        'menu_highlights': 'Fried Chicken, Collard Greens, Mac and Cheese',
+        'is_favorite': 0,
+      },
+      {
+        'name': 'Sweet Auburn BBQ',
+        'cuisine': 'BBQ',
+        'price_range': '\$\$',
+        'open_hours': '11am - 9pm',
+        'location': '656 N Highland Ave, Atlanta',
+        'menu_highlights': 'Smoked Brisket, Pulled Pork, Mac and Cheese',
+        'is_favorite': 0,
+      },
+      {
+        'name': 'Panda Express',
+        'cuisine': 'Chinese',
+        'price_range': '\$',
+        'open_hours': '10am - 9pm',
+        'location': 'GSU Student Center, Atlanta',
+        'menu_highlights': 'Orange Chicken, Fried Rice, Chow Mein',
+        'is_favorite': 0,
+      },
     ];
 
     for(final restaurant in sampleRestaurants) {
@@ -208,7 +235,7 @@ class DatabaseHelper {
   }
 
   //Filtered by Cuisine
-  Future<List<Map<String, dynamic>>> getResturantsByCuisine(String cuisine) async {
+  Future<List<Map<String, dynamic>>> getRestaurantsByCuisine(String cuisine) async {
     final db = await instance.database;
     return await db.query(
       'restaurants',
@@ -409,6 +436,22 @@ Future<List<Map<String, dynamic>>> getRestaurantsByPrice(String priceRange) asyn
       // Treat mood will suggest anything
       suggestions = await db.query(
         'restaurants',
+        orderBy: 'name ASC',
+      );
+    } else if (mood == 'Late Night') {
+      //Late night will only show spots open past 10pm
+      suggestions = await db.query(
+        'restaurants',
+        where: 'open_hours LIKE ? OR open_hours LIKE ? OR open_hours LIKE ?',
+        whereArgs: ['%11pm%', '%12am%', '%1am%'],
+        orderBy: 'name ASC',
+      );
+    } else if (mood == 'Healthy') {
+      //Healthy mood will only show healthy cuisine
+      suggestions = await db.query(
+        'restaurants',
+        where: 'cuisine = ?',
+        whereArgs: ['Healthy'],
         orderBy: 'name ASC',
       );
     } else {
