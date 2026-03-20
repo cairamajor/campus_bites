@@ -47,8 +47,8 @@ class AIService {
       'Hungry',
       'Quick Bite',
       'Treat',
-      'Healthy'
-      'Late Night'
+      'Healthy',
+      'Late Night',
     ];
   }
 
