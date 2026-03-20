@@ -5,6 +5,7 @@ import 'screens/find_food_screen.dart';
 import 'screens/favorites_screen.dart';
 import 'screens/budget_screen.dart';
 import 'screens/ai_matcher_screen.dart';
+import 'screens/splash_screen.dart';
 
 // ─── App Entry Point ──────────────────────────────────────────────────────────
 void main() async {
@@ -32,7 +33,11 @@ class CampusBitesApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFFFAFAF8),
         useMaterial3: true,
       ),
-      home: const MainShell(),
+      initialRoute: '/',
+      routes : {
+        '/': (context) => const SplashScreen(),
+        '/home': (context) => const MainShell(),
+      },
     );
   }
 }
