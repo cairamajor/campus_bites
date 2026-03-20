@@ -294,6 +294,39 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+   Future<void> _saveBudget() async {
+    final val = double.tryParse(_budgetCtrl.text);
+    if (val != null && val > 0) {
+      await BudgetService.updateWeeklyBudget(val);
+      setState(() {
+        _budget = val;
+        _editingBudget = false;
+      });
+    }
+  }
+
+class _BudgetCard extends StatelessWidget {
+  final double budget;
+  final double left;
+  final double pct;
+  final double spent;
+  final bool editing;
+  final TextEditingController controller;
+  final VoidCallback onTapEdit;
+  final VoidCallback onSave;
+
+  const _BudgetCard({
+    required this.budget,
+    required this.left,
+    required this.pct,
+    required this.spent,
+    required this.editing,
+    required this.controller,
+    required this.onTapEdit,
+    required this.onSave,
+  });
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
