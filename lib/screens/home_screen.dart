@@ -253,6 +253,46 @@ class QuickCard extends StatelessWidget {
   }
 }
 
+//HOME SCREEN 
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  double _budget = 50.0;
+  double _spent = 0.0;
+  List<Map<String, dynamic>> _recent = [];
+  bool _editingBudget = false;
+  final _budgetCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _budgetCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    final budget = await BudgetService.getWeeklyBudget();
+    final spent = await BudgetService.getWeeklySpending();
+    final recent = await RestaurantService.getAllRestaurants();
+    if (mounted) {
+      setState(() {
+        _budget = budget;
+        _spent = spent;
+        _recent = recent.take(3).toList();
+        _budgetCtrl.text = budget.toStringAsFixed(0);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
