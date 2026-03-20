@@ -215,7 +215,7 @@ class DatabaseHelper {
       },
       {
         'name' : 'It\'s a Wrap Cafe',
-        'cusine' : 'Healthy',
+        'cuisine' : 'Healthy',
         'price_range' : '\$',
         'open_hours' : '10am - 7pm',
         'location' : '32 Decatur St SE, Atlanta',
@@ -224,7 +224,7 @@ class DatabaseHelper {
       },
       {
          'name' : 'Planet Smoothie',
-        'cusine' : 'Healthy',
+        'cuisine' : 'Healthy',
         'price_range' : '\$',
         'open_hours' : '8:30am - 3pm',
         'location' : '231 Peachtree St NE, Atlanta',

@@ -1,43 +1,13 @@
 import 'package:flutter/material.dart';
+import '../main.dart';
 import '../services/budget_service.dart';
 import '../services/restaurant_service.dart';
 import '../services/favorites_service.dart';
 import '../screens/restaurant_detail_screen.dart';
+import '../screens/theme.dart';
+import '../screens/ai_matcher_screen.dart';
 
-//Theme Constants
-const kBg = Color(0xFFFAFAF8);
-const kCard = Color(0xFFFFFFFF);
-const kAccent = Color(0xFFFF6B35);
-const kAccentLight = Color(0xFFFFF1EC);
-const kGreen = Color(0xFF2ECC71);
-const kGreenLight = Color(0xFFE8FAF0);
-const kPurple = Color(0xFF7C3AED);
-const kPurpleLight = Color(0xFFF3EFFE);
-const kPink = Color(0xFFF43F5E);
-const kPinkLight = Color(0xFFFFF0F3);
-const kBlue = Color(0xFF3B82F6);
-const kBlueLight = Color(0xFFEFF6FF);
-const kText = Color(0xFF1A1A1A);
-const kMuted = Color(0xFF9CA3AF);
-const kBorder = Color(0xFFF0F0EE);
 
-//Emojis for cuisines
-String cuisineEmoji(String cuisine) {
-  const map = {
-    'American': '🍔',
-    'Caribbean': '🌴',
-    'Mexican': '🌮',
-    'Dessert': '🍰',
-    'Halal': '🥙',
-    'Healthy': '🥗',
-    'Indian': '🍛',
-    'Japanese': '🍱',
-    'Soul Food': '🍗',
-    'BBQ': '🍖',
-    'Chinese': '🥡',
-  };
-  return map[cuisine] ?? '🍽️';
-}
 
 // Shared Widgets
 class SectionTitle extends StatelessWidget {
@@ -306,9 +276,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _goToTab(int index) {
-  final shell = context.findAncestorStateOfType<_HomeNavigatorState>();
-  shell?.goTo(index);
-  }
+  final shell = context.findAncestorStateOfType<MainShellState>();
+  shell?.goToTab(index);
+}
 
 @override
   Widget build(BuildContext context) {
@@ -375,7 +345,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   QuickCard(
                     icon: '✨', label: 'AI Matcher', sub: 'Smart suggestions',
                     color: kPurple,
-                    onTap: () => Navigator.pushNamed(context, '/ai'),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AiMatcherScreen()),),
                   ),
                 ],
               ),
@@ -521,8 +493,4 @@ class _BudgetCard extends StatelessWidget {
       ),
     );
   }
-}
-
-abstract class _HomeNavigatorState extends State<StatefulWidget> {
-  void goTo(int index);
 }

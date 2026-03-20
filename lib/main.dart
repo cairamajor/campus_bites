@@ -54,6 +54,7 @@ class MainShellState extends State<MainShell> {
     FindFoodScreen(),
     FavoritesScreen(),
     BudgetScreen(),
+    AiMatcherScreen(),
   ];
 
   void goToTab(int index) {

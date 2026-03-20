@@ -1,16 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/budget_service.dart';
+import '../screens/theme.dart';
 
-// ─── Theme Constants ──────────────────────────────────────────────────────────
-const kBg = Color(0xFFFAFAF8);
-const kCard = Color(0xFFFFFFFF);
-const kAccent = Color(0xFFFF6B35);
-const kGreen = Color(0xFF2ECC71);
-const kGreenLight = Color(0xFFE8FAF0);
-const kPink = Color(0xFFF43F5E);
-const kText = Color(0xFF1A1A1A);
-const kMuted = Color(0xFF9CA3AF);
-const kBorder = Color(0xFFF0F0EE);
+
 
 // ─── Emoji Box Widget ─────────────────────────────────────────────────────────
 class _EmojiBox extends StatelessWidget {
