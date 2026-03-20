@@ -97,7 +97,7 @@ class EmojiBox extends StatelessWidget {
   }
 }
 
-// ─── Restaurant Card ──────────────────────────────────────────────────────────
+//  Restaurant Card 
 class RestaurantCard extends StatefulWidget {
   final Map<String, dynamic> restaurant;
   final VoidCallback? onFavoriteToggle;
@@ -206,7 +206,7 @@ class _RestaurantCardState extends State<RestaurantCard> {
   }
 }
 
-// ─── Quick Access Card ────────────────────────────────────────────────────────
+//  Quick Access Card 
 class QuickCard extends StatelessWidget {
   final String icon;
   final String label;
@@ -304,6 +304,11 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
+
+  void _goToTab(int index) {
+  final shell = context.findAncestorStateOfType<_HomeNavigatorState>();
+  shell?.goTo(index);
+  gi}
 
 @override
   Widget build(BuildContext context) {
@@ -408,41 +413,116 @@ class _BudgetCard extends StatelessWidget {
     required this.onSave,
   });
 
-
-  @override
+@override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Campus Bites"),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF6B35), Color(0xFFFF9A5C)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: kAccent.withOpacity(0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : restaurants.isEmpty
-              ? const Center(child: Text("No food spots yet"))
-              : ListView.builder(
-                  itemCount: restaurants.length,
-                  itemBuilder: (context, index) {
-                    final r = restaurants[index];
-
-                    return Card(
-                      margin: const EdgeInsets.all(10),
-                      child: ListTile(
-                        title: Text(r.name),
-                        subtitle: Text("${r.cuisine} • ${r.priceRange}"),
-                        trailing: const Icon(Icons.arrow_forward),
-                        onTap: () {
-                          // TODO: navigate to detail screen
-                        },
-                      ),
-                    );
-                  },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '💵 Weekly Budget',
+            style: TextStyle(fontSize: 13, color: Colors.white70, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 6),
+          if (editing)
+            Row(children: [
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  autofocus: true,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(
+                    fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white,
+                  ),
+                  decoration: InputDecoration(
+                    prefixText: '\$',
+                    prefixStyle: const TextStyle(fontSize: 28, color: Colors.white70),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.white38),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.white38),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Colors.white),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
                 ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: navigate to add restaurant screen
-        },
-        child: const Icon(Icons.add),
+              ),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: onSave,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Text(
+                    'Save',
+                    style: TextStyle(color: kAccent, fontWeight: FontWeight.w700, fontSize: 14),
+                  ),
+                ),
+              ),
+            ])
+          else
+            GestureDetector(
+              onTap: onTapEdit,
+              child: Row(children: [
+                Text(
+                  '\$${left.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                    fontSize: 40, fontWeight: FontWeight.w900, color: Colors.white, height: 1.1,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'left ✏️',
+                  style: TextStyle(fontSize: 14, color: Colors.white70, fontWeight: FontWeight.w600),
+                ),
+              ]),
+            ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: pct,
+              minHeight: 8,
+              backgroundColor: Colors.white30,
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Spent \$${spent.toStringAsFixed(2)} of \$${budget.toStringAsFixed(0)} this week',
+            style: const TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.w500),
+          ),
+        ],
       ),
     );
   }
+}
+
+abstract class _HomeNavigatorState extends State<StatefulWidget> {
+  void goTo(int index);
 }
