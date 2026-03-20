@@ -305,6 +305,88 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+@override
+  Widget build(BuildContext context) {
+    final left = (_budget - _spent).clamp(0.0, _budget);
+    final pct = (_budget > 0) ? (_spent / _budget).clamp(0.0, 1.0) : 0.0;
+
+    return SafeArea(
+      child: RefreshIndicator(
+        onRefresh: _load,
+        color: kAccent,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Header ──
+              const Text(
+                'Your food & budget companion',
+                style: TextStyle(fontSize: 13, color: kMuted, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Campus Bites 🍽️',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: kText),
+              ),
+              const SizedBox(height: 20),
+
+              // ── Budget Card ──
+              _BudgetCard(
+                budget: _budget,
+                left: left,
+                pct: pct,
+                spent: _spent,
+                editing: _editingBudget,
+                controller: _budgetCtrl,
+                onTapEdit: () => setState(() => _editingBudget = true),
+                onSave: _saveBudget,
+              ),
+              const SizedBox(height: 20),
+
+              // ── Quick Access Grid ──
+              const SectionTitle('Quick Access'),
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.4,
+                children: [
+                  QuickCard(
+                    icon: '🔍', label: 'Find Food', sub: 'Browse nearby options',
+                    color: kBlue, onTap: () => _goToTab(1),
+                  ),
+                  QuickCard(
+                    icon: '💰', label: 'Budget', sub: 'Track your spending',
+                    color: kGreen, onTap: () => _goToTab(3),
+                  ),
+                  QuickCard(
+                    icon: '❤️', label: 'Favorites', sub: 'Your saved spots',
+                    color: kPink, onTap: () => _goToTab(2),
+                  ),
+                  QuickCard(
+                    icon: '✨', label: 'AI Matcher', sub: 'Smart suggestions',
+                    color: kPurple,
+                    onTap: () => Navigator.pushNamed(context, '/ai'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // ── Nearby Spots ──
+              const SectionTitle('Nearby Spots'),
+              ..._recent.map((r) => RestaurantCard(restaurant: r, onFavoriteToggle: _load)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _BudgetCard extends StatelessWidget {
   final double budget;
   final double left;
