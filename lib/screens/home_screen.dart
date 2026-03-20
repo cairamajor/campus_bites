@@ -308,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _goToTab(int index) {
   final shell = context.findAncestorStateOfType<_HomeNavigatorState>();
   shell?.goTo(index);
-  gi}
+  }
 
 @override
   Widget build(BuildContext context) {
