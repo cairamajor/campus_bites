@@ -24,7 +24,6 @@ void main() async {
 // ─── Root App Widget ──────────────────────────────────────────────────────────
 class CampusBitesApp extends StatefulWidget {
   const CampusBitesApp({super.key});
-
   static _CampusBitesAppState of(BuildContext context) {
     return context.findAncestorStateOfType<_CampusBitesAppState>()!;
   }
@@ -39,16 +38,15 @@ class _CampusBitesAppState extends State<CampusBitesApp> {
   @override
   void initState() {
     super.initState();
+    // Load saved dark mode preference when app starts
     _loadDarkMode();
   }
 
-  // Load saved dark mode preference on app start
   Future<void> _loadDarkMode() async {
     final darkMode = await PreferencesHelper.getDarkMode();
     if (mounted) setState(() => _isDarkMode = darkMode);
   }
 
-  // Called from SettingsScreen when user toggles dark mode
   void toggleDarkMode(bool val) {
     setState(() => _isDarkMode = val);
   }
@@ -58,21 +56,41 @@ class _CampusBitesAppState extends State<CampusBitesApp> {
     return MaterialApp(
       title: 'Campus Bites',
       debugShowCheckedModeBanner: false,
-      // Switch between light and dark mode
+      // Switches between light and dark based on _isDarkMode
       themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
+
+      // ── Light Theme ──
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF6B35)),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFFF6B35),
+          brightness: Brightness.light,
+        ),
         scaffoldBackgroundColor: const Color(0xFFFAFAF8),
+        cardColor: const Color(0xFFFFFFFF),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Color(0xFF1A1A1A)),
+          bodyMedium: TextStyle(color: Color(0xFF1A1A1A)),
+          bodySmall: TextStyle(color: Color(0xFF9CA3AF)),
+        ),
         useMaterial3: true,
       ),
+
+      // ── Dark Theme ──
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFFF6B35),
           brightness: Brightness.dark,
         ),
         scaffoldBackgroundColor: const Color(0xFF121212),
+        cardColor: const Color(0xFF1E1E1E),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Color(0xFFF5F5F5)),
+          bodyMedium: TextStyle(color: Color(0xFFF5F5F5)),
+          bodySmall: TextStyle(color: Color(0xFF9CA3AF)),
+        ),
         useMaterial3: true,
       ),
+
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
@@ -109,16 +127,24 @@ class MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    // Use theme colors so nav bar responds to dark mode
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: IndexedStack(
         index: currentIndex,
         children: _screens,
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFFFFFFFF),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFFFFF),
           border: Border(
-            top: BorderSide(color: Color(0xFFF0F0EE), width: 1),
+            top: BorderSide(
+              color: isDark
+                  ? const Color(0xFF2A2A2A)
+                  : const Color(0xFFF0F0EE),
+              width: 1,
+            ),
           ),
         ),
         child: SafeArea(
@@ -155,6 +181,7 @@ class MainShellState extends State<MainShell> {
                   current: currentIndex,
                   onTap: goToTab,
                 ),
+
                 _NavItem(
                   icon: Icons.auto_awesome_rounded,
                   label: 'AI Match',
