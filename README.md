@@ -37,6 +37,7 @@ Install dependencies: flutter pub get
 Run the app: flutter run
 
 ## Usage Guide
+Splash Screen - App startup screen displaying the Campus Bites logo and name
 Home Screen - Central hub with quick access to all features
 Find Food- Browse and filter nearby GSU restaurants
 Restaurant- View menu highlights, save to favorites, leave a review

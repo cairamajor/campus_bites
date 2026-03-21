@@ -68,7 +68,6 @@ class _ReviewCard extends StatelessWidget {
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          // ── Star Rating ──
           ...List.generate(
             5,
             (i) => Icon(
@@ -104,11 +103,13 @@ class _ReviewCard extends StatelessWidget {
 
 // ─── Log Meal Bottom Sheet ────────────────────────────────────────────────────
 class _LogMealSheet extends StatelessWidget {
+  final int restaurantId;
   final String restaurantName;
   final String cuisine;
   final VoidCallback onLogged;
 
   const _LogMealSheet({
+    required this.restaurantId,
     required this.restaurantName,
     required this.cuisine,
     required this.onLogged,
@@ -185,11 +186,22 @@ class _LogMealSheet extends StatelessWidget {
               onPressed: () async {
                 final amount = double.tryParse(amountCtrl.text);
                 if (mealCtrl.text.isEmpty || amount == null) return;
+
+                // Log to budget history
                 await BudgetService.logMealExpense(
                   mealName: mealCtrl.text,
                   amount: amount,
                   category: cuisine,
                 );
+
+                // Save to saved meals
+                await FavoritesService.saveMeal(
+                  restaurantId: restaurantId,
+                  restaurantName: restaurantName,
+                  mealName: mealCtrl.text,
+                  price: amount,
+                );
+
                 Navigator.pop(context);
                 onLogged();
               },
@@ -247,7 +259,6 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
           ),
           const SizedBox(height: 16),
 
-          // ── Star Rating ──
           const Text(
             'Rating',
             style: TextStyle(fontWeight: FontWeight.w600, color: kMuted),
@@ -273,7 +284,6 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
           ),
           const SizedBox(height: 16),
 
-          // ── Note ──
           TextField(
             controller: _noteCtrl,
             maxLines: 3,
@@ -293,7 +303,6 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
           ),
           const SizedBox(height: 16),
 
-          // ── Submit Button ──
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -379,6 +388,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (_) => _LogMealSheet(
+        restaurantId: widget.restaurant['id'] as int? ?? 0,
         restaurantName: widget.restaurant['name'] ?? '',
         cuisine: widget.restaurant['cuisine'] ?? '',
         onLogged: () => ScaffoldMessenger.of(context).showSnackBar(
@@ -449,7 +459,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Emoji Header ──
             Center(
               child: Text(
                 cuisineEmoji(cuisine),
@@ -458,7 +467,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             ),
             const SizedBox(height: 12),
 
-            // ── Name ──
             Text(
               r['name'] ?? '',
               style: const TextStyle(
@@ -467,7 +475,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             ),
             const SizedBox(height: 8),
 
-            // ── Pills ──
             Row(children: [
               _PillBadge(cuisine, color: kBlue, bg: kBlueLight),
               const SizedBox(width: 8),
@@ -483,13 +490,11 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             ]),
             const SizedBox(height: 16),
 
-            // ── Info Rows ──
             _InfoRow(Icons.location_on_rounded, r['location'] ?? ''),
             const SizedBox(height: 8),
             _InfoRow(Icons.access_time_rounded, r['open_hours'] ?? ''),
             const SizedBox(height: 24),
 
-            // ── Menu Highlights ──
             const Text(
               'Menu Highlights',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: kText),
@@ -507,7 +512,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             )),
             const SizedBox(height: 24),
 
-            // ── Log Meal Button ──
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -529,7 +533,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             ),
             const SizedBox(height: 10),
 
-            // ── Write Review Button ──
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
@@ -551,7 +554,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             ),
             const SizedBox(height: 24),
 
-            // ── Reviews Section ──
             if (_reviews.isNotEmpty) ...[
               Text(
                 'Reviews (${_reviews.length})',
