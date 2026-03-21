@@ -344,7 +344,7 @@ class AiMatcherScreen extends StatefulWidget {
 class _AiMatcherScreenState extends State<AiMatcherScreen> {
   String _selectedMood = 'Hungry';
   int _selectedTime = 60;
-  // Uses Restaurant model instead of raw map
+
   List<Restaurant> _suggestions = [];
   String _reason = '';
   bool _loading = false;
@@ -379,7 +379,7 @@ class _AiMatcherScreenState extends State<AiMatcherScreen> {
       minutesBetweenClasses: _selectedTime,
     );
 
-    // Convert raw maps to Restaurant models
+    // Convert map to Restaurant models
     final suggestions =
         rawResults.map((m) => Restaurant.fromMap(m)).toList();
 
