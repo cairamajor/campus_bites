@@ -7,6 +7,7 @@ import 'screens/budget_screen.dart';
 import 'screens/ai_matcher_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/setting_screen.dart';
+import 'db/preferences_helper.dart';
 
 // ─── App Entry Point ──────────────────────────────────────────────────────────
 void main() async {
@@ -21,17 +22,55 @@ void main() async {
 }
 
 // ─── Root App Widget ──────────────────────────────────────────────────────────
-class CampusBitesApp extends StatelessWidget {
+class CampusBitesApp extends StatefulWidget {
   const CampusBitesApp({super.key});
+
+  static _CampusBitesAppState of(BuildContext context) {
+    return context.findAncestorStateOfType<_CampusBitesAppState>()!;
+  }
+
+  @override
+  State<CampusBitesApp> createState() => _CampusBitesAppState();
+}
+
+class _CampusBitesAppState extends State<CampusBitesApp> {
+  bool _isDarkMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDarkMode();
+  }
+
+  // Load saved dark mode preference on app start
+  Future<void> _loadDarkMode() async {
+    final darkMode = await PreferencesHelper.getDarkMode();
+    if (mounted) setState(() => _isDarkMode = darkMode);
+  }
+
+  // Called from SettingsScreen when user toggles dark mode
+  void toggleDarkMode(bool val) {
+    setState(() => _isDarkMode = val);
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Campus Bites',
       debugShowCheckedModeBanner: false,
+      // Switch between light and dark mode
+      themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF6B35)),
         scaffoldBackgroundColor: const Color(0xFFFAFAF8),
+        useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFFF6B35),
+          brightness: Brightness.dark,
+        ),
+        scaffoldBackgroundColor: const Color(0xFF121212),
         useMaterial3: true,
       ),
       initialRoute: '/',
@@ -116,7 +155,6 @@ class MainShellState extends State<MainShell> {
                   current: currentIndex,
                   onTap: goToTab,
                 ),
-                // Fixed: AI Match now switches tabs properly instead of pushing a new screen
                 _NavItem(
                   icon: Icons.auto_awesome_rounded,
                   label: 'AI Match',
@@ -167,7 +205,9 @@ class _NavItem extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: active ? const Color(0xFFFF6B35) : const Color(0xFF9CA3AF),
+              color: active
+                  ? const Color(0xFFFF6B35)
+                  : const Color(0xFF9CA3AF),
               size: 22,
             ),
             const SizedBox(height: 2),
