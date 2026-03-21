@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../db/preferences_helper.dart';
 import '../services/restaurant_service.dart';
 import '../screens/theme.dart';
+import '../main.dart';
 
 // Settings Row Widget
 class _SettingsRow extends StatelessWidget {
@@ -64,7 +65,7 @@ class _SettingsRow extends StatelessWidget {
   }
 }
 
-// Settings Section Card 
+// Settings Section Card
 class _SettingsCard extends StatelessWidget {
   final String title;
   final List<Widget> children;
@@ -105,7 +106,6 @@ class _SettingsCard extends StatelessWidget {
                 .entries
                 .map((e) => Column(children: [
                       e.value,
-                      
                       if (e.key < children.length - 1)
                         const Divider(
                           height: 1,
@@ -122,7 +122,7 @@ class _SettingsCard extends StatelessWidget {
   }
 }
 
-// SETTINGS SCREEN 
+// SETTINGS SCREEN
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -171,20 +171,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() => _notificationsEnabled = val);
   }
 
-  // Save dark mode preference
+  // Save dark mode and immediately switch the app theme
   Future<void> _toggleDarkMode(bool val) async {
     await PreferencesHelper.setDarkMode(val);
     setState(() => _darkMode = val);
-    
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Dark mode preference saved!'),
-          backgroundColor: kPurple,
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
+    // Tell the root app to switch themes immediately
+    CampusBitesApp.of(context).toggleDarkMode(val);
   }
 
   // Show cuisine picker bottom sheet
@@ -233,8 +225,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     decoration: BoxDecoration(
                       color: selected ? kAccent : kBg,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                          color: selected ? kAccent : kBorder),
+                      border:
+                          Border.all(color: selected ? kAccent : kBorder),
                     ),
                     child: Text(
                       c,
@@ -329,7 +321,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
           'Reset Settings?',
           style: TextStyle(fontWeight: FontWeight.w800, color: kText),
@@ -347,7 +340,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onPressed: () async {
               await PreferencesHelper.clearAll();
               Navigator.pop(context);
-              _load(); // Reload defaults
+              _load();
+              // Also reset dark mode in the app
+              CampusBitesApp.of(context).toggleDarkMode(false);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Settings reset to defaults'),
@@ -357,8 +352,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
             child: const Text(
               'Reset',
-              style: TextStyle(
-                  color: kPink, fontWeight: FontWeight.w700),
+              style:
+                  TextStyle(color: kPink, fontWeight: FontWeight.w700),
             ),
           ),
         ],
@@ -374,7 +369,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: kBg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: kText),
+          icon:
+              const Icon(Icons.arrow_back_ios_new_rounded, color: kText),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
@@ -394,7 +390,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _SettingsCard(
                     title: 'Food Preferences',
                     children: [
-                      // Favorite cuisine 
                       GestureDetector(
                         onTap: _showCuisinePicker,
                         child: _SettingsRow(
@@ -421,7 +416,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ),
                       ),
-                      // Price filter — personalizes home screen
                       GestureDetector(
                         onTap: _showPricePicker,
                         child: _SettingsRow(
@@ -452,11 +446,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // ── App Preferences ──
+                  // App Preferences
                   _SettingsCard(
                     title: 'App Preferences',
                     children: [
-                      // Notifications toggle
                       _SettingsRow(
                         icon: Icons.notifications_rounded,
                         iconColor: kPurple,
@@ -469,24 +462,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           activeColor: kPurple,
                         ),
                       ),
-                      // Dark mode toggle
+                      // Dark mode toggle — now actually switches the app theme
                       _SettingsRow(
                         icon: Icons.dark_mode_rounded,
                         iconColor: kText,
                         iconBg: kBorder,
                         title: 'Dark Mode',
-                        subtitle: 'Saved for future update',
+                        subtitle: 'Switch app to dark theme',
                         trailing: Switch(
                           value: _darkMode,
                           onChanged: _toggleDarkMode,
-                          activeColor: kText,
+                          activeColor: kPurple,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 24),
 
-                  // ── About ──
+                  // About
                   _SettingsCard(
                     title: 'About',
                     children: [
@@ -506,8 +499,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           iconBg: kPinkLight,
                           title: 'Reset All Settings',
                           subtitle: 'Restore defaults',
-                          trailing: const Icon(Icons.chevron_right_rounded,
-                              color: kMuted, size: 20),
+                          trailing: const Icon(
+                              Icons.chevron_right_rounded,
+                              color: kMuted,
+                              size: 20),
                         ),
                       ),
                     ],
