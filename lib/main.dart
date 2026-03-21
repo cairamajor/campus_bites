@@ -6,6 +6,7 @@ import 'screens/favorites_screen.dart';
 import 'screens/budget_screen.dart';
 import 'screens/ai_matcher_screen.dart';
 import 'screens/splash_screen.dart';
+import 'screens/setting_screen.dart';
 
 // ─── App Entry Point ──────────────────────────────────────────────────────────
 void main() async {
@@ -34,7 +35,7 @@ class CampusBitesApp extends StatelessWidget {
         useMaterial3: true,
       ),
       initialRoute: '/',
-      routes : {
+      routes: {
         '/': (context) => const SplashScreen(),
         '/home': (context) => const MainShell(),
       },
@@ -53,7 +54,7 @@ class MainShell extends StatefulWidget {
 class MainShellState extends State<MainShell> {
   int currentIndex = 0;
 
-  // All main screens
+  // All main screens in the bottom nav
   final List<Widget> _screens = const [
     HomeScreen(),
     FindFoodScreen(),
@@ -62,6 +63,7 @@ class MainShellState extends State<MainShell> {
     AiMatcherScreen(),
   ];
 
+  // Switch to a tab by index
   void goToTab(int index) {
     setState(() => currentIndex = index);
   }
@@ -114,15 +116,13 @@ class MainShellState extends State<MainShell> {
                   current: currentIndex,
                   onTap: goToTab,
                 ),
+                // Fixed: AI Match now switches tabs properly instead of pushing a new screen
                 _NavItem(
                   icon: Icons.auto_awesome_rounded,
                   label: 'AI Match',
                   index: 4,
                   current: currentIndex,
-                  onTap: (_) => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AiMatcherScreen()),
-                  ),
+                  onTap: goToTab,
                 ),
               ],
             ),
