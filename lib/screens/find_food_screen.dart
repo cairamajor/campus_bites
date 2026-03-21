@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/restaurant_service.dart';
 import '../services/favorites_service.dart';
 import '../screens/theme.dart';
+import '../screens/restaurant_detail_screen.dart';
 
 // ─── Filter Chip Widget ───────────────────────────────────────────────────────
 class _FilterChip extends StatelessWidget {
@@ -125,60 +126,68 @@ class _RestaurantCardState extends State<_RestaurantCard> {
     final price = r['price_range'] as String? ?? '';
     final hours = r['open_hours'] as String? ?? '';
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: kCard,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(children: [
-        _EmojiBox(cuisineEmoji(cuisine)),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(
-              r['name'] ?? '',
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: kText),
-            ),
-            Text(
-              r['location'] ?? '',
-              style: const TextStyle(fontSize: 12, color: kMuted),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 6),
-            Row(children: [
-              _PillBadge(cuisine, color: kBlue, bg: kBlueLight),
-              const SizedBox(width: 6),
-              _PillBadge(price, color: kGreen, bg: kGreenLight),
-            ]),
-          ]),
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RestaurantDetailScreen(restaurant: r),
         ),
-        Column(children: [
-          GestureDetector(
-            onTap: _toggleFav,
-            child: Icon(
-              _isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-              color: _isFav ? kPink : kMuted,
-              size: 22,
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: kCard,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 2),
             ),
+          ],
+        ),
+        child: Row(children: [
+          _EmojiBox(cuisineEmoji(cuisine)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(
+                r['name'] ?? '',
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: kText),
+              ),
+              Text(
+                r['location'] ?? '',
+                style: const TextStyle(fontSize: 12, color: kMuted),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 6),
+              Row(children: [
+                _PillBadge(cuisine, color: kBlue, bg: kBlueLight),
+                const SizedBox(width: 6),
+                _PillBadge(price, color: kGreen, bg: kGreenLight),
+              ]),
+            ]),
           ),
-          const SizedBox(height: 4),
-          Text(
-            hours.split(' ').take(3).join(' '),
-            style: const TextStyle(fontSize: 10, color: kMuted),
-            textAlign: TextAlign.right,
-          ),
+          Column(children: [
+            GestureDetector(
+              onTap: _toggleFav,
+              child: Icon(
+                _isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                color: _isFav ? kPink : kMuted,
+                size: 22,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              hours.split(' ').take(3).join(' '),
+              style: const TextStyle(fontSize: 10, color: kMuted),
+              textAlign: TextAlign.right,
+            ),
+          ]),
         ]),
-      ]),
+      ),
     );
   }
 }
