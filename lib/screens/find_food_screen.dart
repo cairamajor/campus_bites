@@ -53,10 +53,12 @@ class _PillBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
       child: Text(
         text,
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color),
+        style:
+            TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color),
       ),
     );
   }
@@ -74,8 +76,10 @@ class _EmojiBox extends StatelessWidget {
     return Container(
       width: 52,
       height: 52,
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(14)),
-      child: Center(child: Text(emoji, style: const TextStyle(fontSize: 26))),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(14)),
+      child: Center(
+          child: Text(emoji, style: const TextStyle(fontSize: 26))),
     );
   }
 }
@@ -151,30 +155,37 @@ class _RestaurantCardState extends State<_RestaurantCard> {
           _EmojiBox(cuisineEmoji(cuisine)),
           const SizedBox(width: 14),
           Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(
-                r['name'] ?? '',
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: kText),
-              ),
-              Text(
-                r['location'] ?? '',
-                style: const TextStyle(fontSize: 12, color: kMuted),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 6),
-              Row(children: [
-                _PillBadge(cuisine, color: kBlue, bg: kBlueLight),
-                const SizedBox(width: 6),
-                _PillBadge(price, color: kGreen, bg: kGreenLight),
-              ]),
-            ]),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    r['name'] ?? '',
+                    style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: kText),
+                  ),
+                  Text(
+                    r['location'] ?? '',
+                    style: const TextStyle(fontSize: 12, color: kMuted),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Row(children: [
+                    _PillBadge(cuisine, color: kBlue, bg: kBlueLight),
+                    const SizedBox(width: 6),
+                    _PillBadge(price, color: kGreen, bg: kGreenLight),
+                  ]),
+                ]),
           ),
           Column(children: [
             GestureDetector(
               onTap: _toggleFav,
               child: Icon(
-                _isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                _isFav
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
                 color: _isFav ? kPink : kMuted,
                 size: 22,
               ),
@@ -262,7 +273,10 @@ class _FindFoodScreenState extends State<FindFoodScreen> {
               children: [
                 const Text(
                   '🔍 Find Food',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: kText),
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: kText),
                 ),
                 const SizedBox(height: 14),
 
@@ -280,19 +294,19 @@ class _FindFoodScreenState extends State<FindFoodScreen> {
                       hintStyle: TextStyle(color: kMuted, fontSize: 14),
                       prefixIcon: Icon(Icons.search, color: kMuted),
                       border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
                     ),
                   ),
                 ),
                 const SizedBox(height: 12),
 
-                // ── Price Filter Chips ──
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(children: [
+                // ── Filters Row --
+                Row(
+                  children: [
+                    // Price filter chips
                     _FilterChip(
-                      label: 'All \$',
+                      label: 'All',
                       selected: _selectedPrice == 'All',
                       onTap: () {
                         setState(() => _selectedPrice = 'All');
@@ -317,25 +331,78 @@ class _FindFoodScreenState extends State<FindFoodScreen> {
                         _load();
                       },
                     ),
-                  ]),
+                    const SizedBox(width: 8),
+                    _FilterChip(
+                      label: '\$\$\$',
+                      selected: _selectedPrice == '\$\$\$',
+                      onTap: () {
+                        setState(() => _selectedPrice = '\$\$\$');
+                        _load();
+                      },
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
 
-                // ── Cuisine Filter Chips ──
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: _cuisines.map((c) => Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: _FilterChip(
-                        label: c,
-                        selected: _selectedCuisine == c,
-                        onTap: () {
-                          setState(() => _selectedCuisine = c);
-                          _load();
-                        },
+                // ── Cuisine Dropdown — replaces the scrollable chips ──
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _selectedCuisine != 'All' ? kAccent : kCard,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: _selectedCuisine != 'All' ? kAccent : kBorder,
+                      width: 2,
+                    ),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedCuisine,
+                      isExpanded: true,
+                      icon: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: _selectedCuisine != 'All'
+                            ? Colors.white
+                            : kMuted,
                       ),
-                    )).toList(),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: _selectedCuisine != 'All'
+                            ? Colors.white
+                            : kText,
+                      ),
+                      dropdownColor: kCard,
+                      borderRadius: BorderRadius.circular(14),
+                      
+                      items: _cuisines.map((c) {
+                        return DropdownMenuItem<String>(
+                          value: c,
+                          child: Row(children: [
+                            Text(
+                              c == 'All' ? '🍽️' : cuisineEmoji(c),
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              c,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: kText,
+                              ),
+                            ),
+                          ]),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() => _selectedCuisine = val);
+                          _load();
+                        }
+                      },
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -343,7 +410,10 @@ class _FindFoodScreenState extends State<FindFoodScreen> {
                 // ── Result Count ──
                 Text(
                   '${_restaurants.length} spots found',
-                  style: const TextStyle(fontSize: 13, color: kMuted, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      fontSize: 13,
+                      color: kMuted,
+                      fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -352,14 +422,16 @@ class _FindFoodScreenState extends State<FindFoodScreen> {
           // ── Restaurant List ──
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator(color: kAccent))
+                ? const Center(
+                    child: CircularProgressIndicator(color: kAccent))
                 : RefreshIndicator(
                     onRefresh: _load,
                     color: kAccent,
                     child: _restaurants.isEmpty
                         ? _EmptyState()
                         : ListView.builder(
-                            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                            padding:
+                                const EdgeInsets.fromLTRB(20, 8, 20, 24),
                             itemCount: _restaurants.length,
                             itemBuilder: (_, i) => _RestaurantCard(
                               restaurant: _restaurants[i],
@@ -385,7 +457,8 @@ class _EmptyState extends StatelessWidget {
       Center(
         child: Text(
           'No restaurants found',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: kText),
+          style: TextStyle(
+              fontSize: 16, fontWeight: FontWeight.w700, color: kText),
         ),
       ),
       SizedBox(height: 4),
