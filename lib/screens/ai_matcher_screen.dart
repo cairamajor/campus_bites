@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/restaurant.dart';
 import '../services/ai_service.dart';
 import '../services/budget_service.dart';
 import '../screens/theme.dart';
@@ -15,8 +16,10 @@ class _EmojiBox extends StatelessWidget {
     return Container(
       width: 52,
       height: 52,
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(14)),
-      child: Center(child: Text(emoji, style: const TextStyle(fontSize: 26))),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(14)),
+      child:
+          Center(child: Text(emoji, style: const TextStyle(fontSize: 26))),
     );
   }
 }
@@ -33,35 +36,52 @@ class _PillBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
       child: Text(
         text,
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color),
+        style: TextStyle(
+            fontSize: 11, fontWeight: FontWeight.w600, color: color),
       ),
     );
   }
 }
 
-// ─── Suggestion Restaurant Card ───────────────────────────────────────────────
-class _SuggestionCard extends StatelessWidget {
-  final Map<String, dynamic> restaurant;
+// Restaurant Card with Thumbs Up/Down
+class _SuggestionCard extends StatefulWidget {
+  final Restaurant restaurant;
 
   const _SuggestionCard({required this.restaurant});
 
   @override
-  Widget build(BuildContext context) {
-    final r = restaurant;
-    final cuisine = r['cuisine'] as String? ?? '';
-    final price = r['price_range'] as String? ?? '';
-    final hours = r['open_hours'] as String? ?? '';
+  State<_SuggestionCard> createState() => _SuggestionCardState();
+}
 
-    return Container(
+class _SuggestionCardState extends State<_SuggestionCard> {
+  bool? _feedback;
+
+  @override
+  Widget build(BuildContext context) {
+    final r = widget.restaurant;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: kCard,
+        color: _feedback == true
+            ? kGreenLight
+            : _feedback == false
+                ? kPinkLight
+                : kCard,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: kPurple.withOpacity(0.15)),
+        border: Border.all(
+          color: _feedback == true
+              ? kGreen.withOpacity(0.4)
+              : _feedback == false
+                  ? kPink.withOpacity(0.3)
+                  : kPurple.withOpacity(0.15),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -70,35 +90,136 @@ class _SuggestionCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(children: [
-        _EmojiBox(cuisineEmoji(cuisine), bg: kPurpleLight),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(
-              r['name'] ?? '',
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: kText),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            _EmojiBox(cuisineEmoji(r.cuisine), bg: kPurpleLight),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      r.name,
+                      style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: kText),
+                    ),
+                    Text(
+                      r.location,
+                      style: const TextStyle(fontSize: 12, color: kMuted),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Row(children: [
+                      _PillBadge(r.cuisine,
+                          color: kPurple, bg: kPurpleLight),
+                      const SizedBox(width: 6),
+                      _PillBadge(r.priceRange,
+                          color: kGreen, bg: kGreenLight),
+                    ]),
+                  ]),
             ),
             Text(
-              r['location'] ?? '',
-              style: const TextStyle(fontSize: 12, color: kMuted),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              r.openHours.split(' ').take(3).join(' '),
+              style: const TextStyle(fontSize: 10, color: kMuted),
+              textAlign: TextAlign.right,
             ),
-            const SizedBox(height: 6),
-            Row(children: [
-              _PillBadge(cuisine, color: kPurple, bg: kPurpleLight),
-              const SizedBox(width: 6),
-              _PillBadge(price, color: kGreen, bg: kGreenLight),
-            ]),
           ]),
-        ),
-        Text(
-          hours.split(' ').take(3).join(' '),
-          style: const TextStyle(fontSize: 10, color: kMuted),
-          textAlign: TextAlign.right,
-        ),
-      ]),
+          const SizedBox(height: 12),
+
+          // ── Feedback Row  ──
+          Row(
+            children: [
+              const Icon(Icons.info_outline_rounded,
+                  size: 13, color: kMuted),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  _feedback == true
+                      ? 'Thanks for the feedback! 👍'
+                      : _feedback == false
+                          ? 'Got it, we\'ll improve your suggestions 👎'
+                          : 'Was this suggestion helpful?',
+                  style: const TextStyle(fontSize: 11, color: kMuted),
+                ),
+              ),
+              if (_feedback == null) ...[
+                // Thumbs up button
+                GestureDetector(
+                  onTap: () {
+                    setState(() => _feedback = true);
+                    AIService.recordFeedback(
+                      restaurantId: r.id ?? 0,
+                      liked: true,
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: kGreenLight,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: kGreen.withOpacity(0.3)),
+                    ),
+                    child: const Row(children: [
+                      Icon(Icons.thumb_up_rounded,
+                          size: 13, color: kGreen),
+                      SizedBox(width: 4),
+                      Text('Yes',
+                          style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: kGreen)),
+                    ]),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                // Thumbs down button
+                GestureDetector(
+                  onTap: () {
+                    setState(() => _feedback = false);
+                    AIService.recordFeedback(
+                      restaurantId: r.id ?? 0,
+                      liked: false,
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: kPinkLight,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: kPink.withOpacity(0.3)),
+                    ),
+                    child: const Row(children: [
+                      Icon(Icons.thumb_down_rounded,
+                          size: 13, color: kPink),
+                      SizedBox(width: 4),
+                      Text('No',
+                          style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: kPink)),
+                    ]),
+                  ),
+                ),
+              ] else
+                // Show the recorded feedback state
+                Icon(
+                  _feedback == true
+                      ? Icons.thumb_up_rounded
+                      : Icons.thumb_down_rounded,
+                  size: 16,
+                  color: _feedback == true ? kGreen : kPink,
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -123,7 +244,8 @@ class _MoodChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: selected ? kPurple : kCard,
           borderRadius: BorderRadius.circular(20),
@@ -193,7 +315,10 @@ class _EmptyState extends StatelessWidget {
         Center(
           child: Text(
             'No matches found',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: kText),
+            style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: kText),
           ),
         ),
         SizedBox(height: 4),
@@ -219,7 +344,8 @@ class AiMatcherScreen extends StatefulWidget {
 class _AiMatcherScreenState extends State<AiMatcherScreen> {
   String _selectedMood = 'Hungry';
   int _selectedTime = 60;
-  List<Map<String, dynamic>> _suggestions = [];
+
+  List<Restaurant> _suggestions = [];
   String _reason = '';
   bool _loading = false;
   bool _searched = false;
@@ -238,7 +364,7 @@ class _AiMatcherScreenState extends State<AiMatcherScreen> {
       _searched = false;
     });
 
-    final results = await AIService.getSuggestions(
+    final rawResults = await AIService.getSuggestions(
       mood: _selectedMood,
       minutesBetweenClasses: _selectedTime,
     );
@@ -253,9 +379,13 @@ class _AiMatcherScreenState extends State<AiMatcherScreen> {
       minutesBetweenClasses: _selectedTime,
     );
 
+    // Convert map to Restaurant models
+    final suggestions =
+        rawResults.map((m) => Restaurant.fromMap(m)).toList();
+
     if (mounted) {
       setState(() {
-        _suggestions = results;
+        _suggestions = suggestions;
         _reason = reason;
         _loading = false;
         _searched = true;
@@ -274,12 +404,14 @@ class _AiMatcherScreenState extends State<AiMatcherScreen> {
         backgroundColor: kBg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: kText),
+          icon:
+              const Icon(Icons.arrow_back_ios_new_rounded, color: kText),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           '✨ AI Matcher',
-          style: TextStyle(color: kText, fontWeight: FontWeight.w800, fontSize: 20),
+          style: TextStyle(
+              color: kText, fontWeight: FontWeight.w800, fontSize: 20),
         ),
       ),
       body: SingleChildScrollView(
@@ -314,35 +446,47 @@ class _AiMatcherScreenState extends State<AiMatcherScreen> {
             // ── Mood Selector ──
             const Text(
               "What's your mood?",
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: kText),
+              style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: kText),
             ),
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: moods.map((m) => _MoodChip(
-                mood: m,
-                icon: _moodIcons[m] ?? '🍽️',
-                selected: _selectedMood == m,
-                onTap: () => setState(() => _selectedMood = m),
-              )).toList(),
+              children: moods
+                  .map((m) => _MoodChip(
+                        mood: m,
+                        icon: _moodIcons[m] ?? '🍽️',
+                        selected: _selectedMood == m,
+                        onTap: () =>
+                            setState(() => _selectedMood = m),
+                      ))
+                  .toList(),
             ),
             const SizedBox(height: 24),
 
             // ── Time Selector ──
             const Text(
               'Time between classes',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: kText),
+              style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: kText),
             ),
             const SizedBox(height: 10),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: times.map((t) => _TimeChip(
-                minutes: t,
-                selected: _selectedTime == t,
-                onTap: () => setState(() => _selectedTime = t),
-              )).toList(),
+              children: times
+                  .map((t) => _TimeChip(
+                        minutes: t,
+                        selected: _selectedTime == t,
+                        onTap: () =>
+                            setState(() => _selectedTime = t),
+                      ))
+                  .toList(),
             ),
             const SizedBox(height: 24),
 
@@ -370,7 +514,8 @@ class _AiMatcherScreenState extends State<AiMatcherScreen> {
                       )
                     : const Text(
                         'Find My Match ✨',
-                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 16),
                       ),
               ),
             ),
@@ -379,21 +524,28 @@ class _AiMatcherScreenState extends State<AiMatcherScreen> {
             if (_searched) ...[
               const SizedBox(height: 24),
 
-              // Reason banner
+              
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: kPurpleLight,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Text(
-                  _reason,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: kPurple,
-                    fontWeight: FontWeight.w500,
+                child: Row(children: [
+                  const Icon(Icons.lightbulb_outline_rounded,
+                      color: kPurple, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _reason,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: kPurple,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
-                ),
+                ]),
               ),
               const SizedBox(height: 16),
 
