@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/favorites_service.dart';
 import '../screens/theme.dart';
+import '../screens/restaurant_detail_screen.dart';
 
 // ─── Emoji Box Widget ─────────────────────────────────────────────────────────
 class _EmojiBox extends StatelessWidget {
@@ -80,10 +81,12 @@ class _EmptyState extends StatelessWidget {
 class _FavoriteRestaurantCard extends StatelessWidget {
   final Map<String, dynamic> restaurant;
   final VoidCallback onRemove;
+  final VoidCallback onRefresh;
 
   const _FavoriteRestaurantCard({
     required this.restaurant,
     required this.onRemove,
+    required this.onRefresh,
   });
 
   @override
@@ -93,56 +96,67 @@ class _FavoriteRestaurantCard extends StatelessWidget {
     final price = r['price_range'] as String? ?? '';
     final hours = r['open_hours'] as String? ?? '';
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: kCard,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
+    return GestureDetector(
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RestaurantDetailScreen(restaurant: r),
           ),
-        ],
-      ),
-      child: Row(children: [
-        _EmojiBox(cuisineEmoji(cuisine), bg: kPinkLight),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(
-              r['name'] ?? '',
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: kText),
+        );
+        onRefresh(); // Refresh after coming back
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: kCard,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 2),
             ),
-            Text(
-              r['location'] ?? '',
-              style: const TextStyle(fontSize: 12, color: kMuted),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 6),
-            Row(children: [
-              _PillBadge(cuisine, color: kBlue, bg: kBlueLight),
-              const SizedBox(width: 6),
-              _PillBadge(price, color: kGreen, bg: kGreenLight),
-            ]),
-          ]),
+          ],
         ),
-        Column(children: [
-          GestureDetector(
-            onTap: onRemove,
-            child: const Icon(Icons.favorite_rounded, color: kPink, size: 22),
+        child: Row(children: [
+          _EmojiBox(cuisineEmoji(cuisine), bg: kPinkLight),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(
+                r['name'] ?? '',
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: kText),
+              ),
+              Text(
+                r['location'] ?? '',
+                style: const TextStyle(fontSize: 12, color: kMuted),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 6),
+              Row(children: [
+                _PillBadge(cuisine, color: kBlue, bg: kBlueLight),
+                const SizedBox(width: 6),
+                _PillBadge(price, color: kGreen, bg: kGreenLight),
+              ]),
+            ]),
           ),
-          const SizedBox(height: 4),
-          Text(
-            hours.split(' ').take(3).join(' '),
-            style: const TextStyle(fontSize: 10, color: kMuted),
-            textAlign: TextAlign.right,
-          ),
+          Column(children: [
+            GestureDetector(
+              onTap: onRemove,
+              child: const Icon(Icons.favorite_rounded, color: kPink, size: 22),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              hours.split(' ').take(3).join(' '),
+              style: const TextStyle(fontSize: 10, color: kMuted),
+              textAlign: TextAlign.right,
+            ),
+          ]),
         ]),
-      ]),
+      ),
     );
   }
 }
@@ -265,7 +279,6 @@ class _FavoritesScreenState extends State<FavoritesScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header ──
           const Padding(
             padding: EdgeInsets.fromLTRB(20, 16, 20, 12),
             child: Text(
@@ -274,7 +287,6 @@ class _FavoritesScreenState extends State<FavoritesScreen>
             ),
           ),
 
-          // ── Tab Bar ──
           TabBar(
             controller: _tabCtrl,
             labelColor: kAccent,
@@ -288,7 +300,6 @@ class _FavoritesScreenState extends State<FavoritesScreen>
             ],
           ),
 
-          // ── Tab Content ──
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator(color: kAccent))
@@ -313,6 +324,7 @@ class _FavoritesScreenState extends State<FavoritesScreen>
                                   return _FavoriteRestaurantCard(
                                     restaurant: r,
                                     onRemove: () => _removeFavorite(r['id'] as int),
+                                    onRefresh: _load,
                                   );
                                 },
                               ),
