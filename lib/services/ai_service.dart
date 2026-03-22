@@ -4,6 +4,7 @@ import '../db/preferences_helper.dart';
 
 class AIService {
   // Get restaurant suggestions based on mood, time, and remaining budget
+  // Filters out any restaurants the user has previously disliked
   static Future<List<Map<String, dynamic>>> getSuggestions({
     required String mood,
     required int minutesBetweenClasses,
@@ -12,13 +13,27 @@ class AIService {
     final spent = await DatabaseHelper.instance.getWeeklyTotal();
     final remaining = budget - spent;
 
-    return await DatabaseHelper.instance.getAISuggestions(
+    final results = await DatabaseHelper.instance.getAISuggestions(
       mood: mood,
       remainingBudget: remaining,
       minutesBetweenClasses: minutesBetweenClasses,
     );
+
+    // Load SharedPreferences once and filter out disliked restaurants
+    final prefs = await SharedPreferences.getInstance();
+    final filtered = results.where((r) {
+      final id = r['id'] as int?;
+      if (id == null) return true;
+      final feedback = prefs.getBool('feedback_$id');
+      // Remove if user thumbed down false and if liked it is true.
+      return feedback != false;
+    }).toList();
+
+    return filtered;
   }
-  
+
+  // Records user thumbs up/down on a suggestion
+  // Saves to SharedPreferences so suggestions improve over time
   static Future<void> recordFeedback({
     required int restaurantId,
     required bool liked,
@@ -28,10 +43,11 @@ class AIService {
     await prefs.setBool(key, liked);
   }
 
+  // Check if a restaurant was previously liked true and disliked false
   static Future<bool?> getFeedback(int restaurantId) async {
     final prefs = await SharedPreferences.getInstance();
     final key = 'feedback_$restaurantId';
-    return prefs.getBool(key); 
+    return prefs.getBool(key);
   }
 
   // Get all restaurant IDs the user has liked 
@@ -48,7 +64,7 @@ class AIService {
     return liked;
   }
 
-  // Message that explains why a suggestion was made 
+  // Message that explains why a suggestion was made
   static String getSuggestionReason({
     required String mood,
     required double remainingBudget,
