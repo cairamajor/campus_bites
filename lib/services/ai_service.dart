@@ -25,7 +25,7 @@ class AIService {
       final id = r['id'] as int?;
       if (id == null) return true;
       final feedback = prefs.getBool('feedback_$id');
-      // Remove if user thumbed down (false), keep if liked (true) or unrated (null)
+      // Remove if user thumbed down  keep if liked  or unrated 
       return feedback != false;
     }).toList();
 
@@ -43,14 +43,14 @@ class AIService {
     await prefs.setBool(key, liked);
   }
 
-  // Check if a restaurant was previously liked (true), disliked (false), or unrated (null)
+  // Check if a restaurant was previously liked or disliked
   static Future<bool?> getFeedback(int restaurantId) async {
     final prefs = await SharedPreferences.getInstance();
     final key = 'feedback_$restaurantId';
     return prefs.getBool(key);
   }
 
-  // Get all restaurant IDs the user has liked — used for pattern-based suggestions
+  // Get all restaurant IDs the user has liked 
   static Future<List<int>> getLikedRestaurantIds() async {
     final prefs = await SharedPreferences.getInstance();
     final keys = prefs.getKeys().where((k) => k.startsWith('feedback_'));
@@ -87,7 +87,7 @@ class AIService {
     }
   }
 
-  // List of available moods for the UI chips
+  // List of available moods for the UI 
   static List<String> getAvailableMoods() {
     return ['Hungry', 'Quick Bite', 'Treat', 'Healthy', 'Late Night'];
   }
